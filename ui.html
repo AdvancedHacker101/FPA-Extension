@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--Page styling, should move to a separate css file-->
+	<style type="text/css">
+		html body .container {
+			height: 500px;
+			width: 300px;
+			overflow-y: auto;
+		}
+
+		ul {
+			list-style-type: none;
+			padding: 0px;
+		}
+
+		li:hover {
+			background-color: #c4fcff;
+		}
+
+		button.add {
+			background: url("add_icon.svg");
+			background-repeat: no-repeat;
+			background-position: center;
+			border: none;
+			width: 24px;
+			height: 24px;
+			margin-top: 50%;
+		}
+
+		button.remove {
+			background: url("remove_icon.svg");
+			background-repeat: no-repeat;
+			background-position: center;
+			border: none;
+			width: 24px;
+			height: 24px;
+			margin-top: 50%;
+		}
+
+		div.credentials{
+			max-width: 175px;
+			overflow: hidden;
+			display: inline-block;
+		}
+
+		div.actionButtons {
+			max-width: 100px;
+			overflow: hidden;
+			float: right;
+			margin-right: 20px;
+		}
+
+		p.userdata {
+			max-width: 175px;
+		}
+
+		p.hostname {
+			font-size: 18px;
+			margin: 0px 0px 16px 0px;
+		}
+
+		p.credential {
+			font-size: 11px;
+			color: #c8cece;
+			margin: 0px 0px 5px 0px;
+		}
+	</style>
+
+	<!--Include jQuery-->
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<!--Include UI generator-->
+	<script type="text/javascript" src="popup.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+	<!--Pending Credentials List-->
+	<ul id="cred_list">
+	</ul>
+</div>
+
+</body>
+</html>

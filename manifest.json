@@ -1,0 +1,23 @@
+{
+	"manifest_version": 2, //Constant
+	"author": "Advanced Hacking 101", //Dev name
+	"name": "Fingerprint Authentication", //Application short name
+	"version": "1.0", //Application version
+	"description": "Password manager using your phone and fingerprint to encrypt data", //Application description
+	"content_scripts": [{ //Scripts that run on the visited site
+		"matches": ["http://*/*", "https://*/*"], //Run on every site
+		"js": ["jquery.min.js", "main.js"], //Javascript include files (jQuery and main.js)
+		"css": ["alert.css"] //Include the alert box css
+	}],
+	"browser_action": { //The UI of the application
+    	"default_icon": "icon1.png", //The default startup icon
+    	"default_popup": "ui.html" //The UI html file
+  	},
+  	"background": { //Background (back-end) script
+  		"scripts": ["background.js", "jquery.min.js"] //Javascript includes (jQuery and background.js)
+  	},
+  	"permissions": [ //Requested permissions
+  		"storage" //for localStorage
+  	]
+
+}

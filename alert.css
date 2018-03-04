@@ -1,0 +1,58 @@
+/*Alert Box Main Style*/
+.alert {
+    padding: 20px;
+    color: white;
+    margin-bottom: 15px;
+    opacity: 1;
+    transition: opacity 0.4s;
+    position: absolute;
+    z-index: 100000;
+    right: 0px;
+    top: 0px;
+    margin-left: auto;
+    width: 300px;
+}
+
+/*Error alert box sub-style*/
+.alert.error {
+    background-color: #f44336; /*(Red color)*/
+}
+
+/*Success alert box sub-style*/
+.alert.success {
+    background-color: #4CAF50; /*(Green color)*/
+}
+
+/*Info alert box sub-style*/
+.alert.info {
+    background-color: #2196F3; /*(Blue Color)*/
+}
+
+/*Warning alert box sub-style*/
+.alert.warning {
+    background-color: #ff9800; /*(Yellow Color)*/
+}
+
+/*Alert box close button main style*/
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/*Alert box close button hover change color*/
+.closebtn:hover {
+    color: black;
+}
+
+/*Password fill hyperlink main style*/
+.fillText {
+    color: white;
+    text-decoration: underline;
+    cursor: pointer;
+}
