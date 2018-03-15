@@ -17,7 +17,9 @@
   		"scripts": ["background.js", "jquery.min.js"] //Javascript includes (jQuery and background.js)
   	},
   	"permissions": [ //Requested permissions
-  		"storage" //for localStorage
+  		"storage", //for localStorage
+  		"contextMenus", //for right click context menus
+  		"tabs" //for sending messages to a specific tab
   	]
 
 }

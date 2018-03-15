@@ -36,6 +36,20 @@ class NetworkHandler {
 		});
 	}
 
+	//Get secure random string data from the server
+	getRandomPassword() {
+		var inst = this;
+		var promise = new Promise(function (resolve, reject) {
+			inst.buildRequest("get-random", function (response) {
+				resolve(response.substring(10));
+			}, function (xhr, opt, twerror) {
+				reject(twerror);
+			}, {}, "GET", "");
+		});
+
+		return promise;
+	}
+
 	//Get tracker ID from the server
 	getRequestToken() {
 		var inst = this;
@@ -289,10 +303,33 @@ function rememberLogin(url) {
 	}
 }
 
+function setupContextMenu() {
+	chrome.contextMenus.create({
+		title: "Generate Random Password",
+		type: "normal",
+		id: "fpa_generate_random_password",
+		contexts: ["editable"]
+	});
+
+	chrome.contextMenus.onClicked.addListener(function (info, tab) {
+		writeLine("Context menu clicked");
+		writeLine(info);
+		if (info.menuItemId !== "fpa_generate_random_password") return;
+		var nh = new NetworkHandler();
+		nh.getRandomPassword().then(function (pass) {
+			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "value": pass});
+		}, function (errorMessage) {
+			writeLine("Error occurred: " + errorMessage);
+		});
+		
+	});
+}
+
 //Entry point
 writeLine("Background Script Running");
 pushPasswordQueue = new QueueManager();
 getPasswordQueue = new QueueManager();
+setupContextMenu();
 
 //Message from exensions
 chrome.runtime.onMessage.addListener(function (input, sender, sendResponse) {

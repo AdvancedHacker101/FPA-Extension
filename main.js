@@ -244,9 +244,28 @@ function setupPageCallback(){
 	}, false);
 }
 
+var clickedElement;
+
+function bindContextMenu() {
+	window.addEventListener("mousedown", function (e) {
+		if (e.button == 2) { //Check for Right Click
+			clickedElement = e.target;
+		}
+	}, true);
+
+	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+		writeLine("Got request");
+	    if(request.cmd == "fpa_set_randomPassword") {
+	    	writeLine("Got request to set password");
+	        clickedElement.value = request.value;
+	    }
+	});
+}
+
 //Entry point
 writeLine("FPA Is Running");
 setupPageCallback(); //Setup the sendMessage function
+bindContextMenu(); //Handle the click event of generate random password
 var checkCreds = {
 	"req": "has-credential",
 	"url": window.location.href
