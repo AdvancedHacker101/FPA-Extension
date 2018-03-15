@@ -134,6 +134,9 @@ function getLoginForms(fill){
 					writeLine("Password: " + password);
 					pushCredentials(userName, password); //Push credentials to the phone
 				});
+				if (window.location.protocol === "http:") {
+					alertHTTP();
+				}
 			}
 			else { //Password stored on the phone's DB
 				var aw = new AlertWindow(); //New alert window
@@ -260,6 +263,12 @@ function bindContextMenu() {
 	        clickedElement.value = request.value;
 	    }
 	});
+}
+
+function alertHTTP() {
+	var aw = new AlertWindow();
+	var alertBox = aw.warning("Login Form Detected and this site uses insecure HTTP!")
+	aw.pushAlertWindow(alertBox);
 }
 
 //Entry point
