@@ -235,11 +235,11 @@ function sendMessage(message, callback){
 	window.dispatchEvent(event); //Dispatch the event
 }
 
-//TODO: implement same origin policy to prevent unauthorized password requests
 //Setup sendMessage EventHandler
 function setupPageCallback(){
 	//Subscribe for sendMessage events
 	window.addEventListener("fpa_message_passing", function (eventArgs){
+		if (typeof(msg.href) !== "undefined" && msg.href !== window.location.href) return; //Prevent malicious site from requesting credentials
 		chrome.runtime.sendMessage(eventArgs.detail.msg, eventArgs.detail.func); //Send mesage to background script
 	}, false);
 }
