@@ -1,153 +1,96 @@
 var debug = false; //True if debug version (for UI testing)
 
-//UI Manager (back-end data -> UI)
-class uiManager {
+//Create a listItem from credentials
+//host: the host the credentials were captured on
+//username: the submitted username
+//password: the submitted password
+//onadd: the onclick function for the add button
+//onremove: the onlick function for the remove button
+function getItem(host, username, password, onadd, onremove) {
+	var getInner = function (text) {
+		return document.createTextNode(text);
+	};
+	var maskPassword = function (pass) {
+		var length = pass.length;
+		var result = "";
+		for (var i = 0; i < length; i++) {
+			result += "*";
+		}
 
-	//Get the main ul element
-	constructor() {
-		this.listElement = document.getElementById("cred_list");
-	}
+		return result;
+	};
+	var listItem = document.createElement("span");
+	listItem.classList.add("list-group-item");
+	var hostHeading = document.createElement("h6");
+	hostHeading.classList.add("list-item-heading");
+	hostHeading.classList.add("listHeading");
+	hostHeading.appendChild(getInner(host));
+	var userSmall = document.createElement("small");
+	userSmall.classList.add("list-item-text");
+	userSmall.appendChild(getInner(username));
+	var passSmall = document.createElement("small");
+	passSmall.appendChild(getInner(maskPassword(password)));
+	var lineBreak = document.createElement("br");
+	var addButton = document.createElement("span");
+	addButton.classList.add("fui-plus-circle");
+	addButton.classList.add("addButton");
+	addButton.onclick = onadd;
+	addButton.title = "Save credentials on phone";
+	var removeButton = document.createElement("span");
+	removeButton.classList.add("fui-cross-circle");
+	removeButton.classList.add("removeButton");
+	removeButton.title = "Remove Credentials From list";
+	removeButton.onclick = onremove;
+	listItem.appendChild(hostHeading);
+	listItem.appendChild(userSmall);
+	listItem.appendChild(removeButton);
+	listItem.appendChild(addButton);
+	listItem.appendChild(lineBreak);
+	listItem.appendChild(passSmall);
 
-	//Get a listItem
-	getListItem() {
-		var listItem = document.createElement("li");
-		return listItem;
-	}
+	return listItem;
+}
 
-	//get the add button
-	getAddButton() {
-		var button = document.createElement("button");
-		button.classList.add("add");
-		button.title = "Add to password manager";
-		return button;
-	}
+//Draw a horizontal line
+//parentElement: the element to draw the line on
+function drawHorizontalLine (parentElement) {
+	var hr = document.createElement("hr");
+	parentElement.appendChild(hr);
+}
 
-	//Get the remove button
-	getRemoveButton() {
-		var button = document.createElement("button");
-		button.classList.add("remove");
-		button.title = "Remove From Pending";
-		return button;
-	}
+//Add no pending data heading
+//parentElement: the parent element to append the heading to
+function addNoElements (parentElement) {
+	var heading = document.createElement("h6");
+	heading.classList.add("noItems");
+	heading.appendChild(document.createTextNode("No Pending Credentials"));
+	parentElement.appendChild(heading);
+}
 
-	//Get the website label
-	getHostNameLabel() {
-		var p = document.createElement("p");
-		p.classList.add("userdata");
-		p.classList.add("hostname");
-		return p;
-	}
-
-	//Get the credential label
-	getCredentialLabel() {
-		var p = document.createElement("p");
-		p.classList.add("userdata");
-		p.classList.add("credential");
-		return p;
-	}
-
-	//Get the div for the hostname and credentials
-	getTextContainer() {
-		var div = document.createElement("div");
-		div.classList.add("credentials");
-		return div;
-	}
-
-	//Get the div for the add and remove button
-	getButtonContainer() {
-		var div = document.createElement("div");
-		div.classList.add("actionButtons");
-		return div;
-	}
-
-	//Set the innerHTML of an element
-	//element: the element to set the innerHTML of
-	//text: the text to set the innerHTML to
-	setInnerText(element, text) {
-		element.appendChild(document.createTextNode(text));
-	}
-
-	//Set the onclick of a button
-	//element: the button to set the onclick of
-	//func: the onclick function
-	setOnClick(element, func) {
-		element.onclick = func;
-	}
-
-	//Add a list item to the list
-	//listItem: the item to add to the list
-	pushItem(listItem)
-	{
-		this.listElement.appendChild(listItem);
-	}
-
-	//Remove a listItem from the list
-	//listItem: the item to remove from the list
-	removeItem(listItem)
-	{
-		this.listElement.removeChild(listItem);
-	}
-
-	//Append an element to another
-	//element: the element to append
-	//parent: the element to append to
-	addElement(element, parent)
-	{
-		parent.appendChild(element);
-	}
-
-	//Clear the ul list
-	clearList() {
-		$(this.listElement).empty();
+//Clear the list container element's children
+function clearList() {
+	var listContainer = document.getElementById("credential_list");
+	while (listContainer.firstChild) {
+		listContainer.removeChild(listContainer.firstChild);
 	}
 }
 
 //Build the pending list from an array of credentials
 function buildList(iterate) {
-	var manager = new uiManager(); //Get a new UI manager
-	manager.clearList(); //Cleare the previous list
+	//The parentElement containing the listItems
+	var parent = document.getElementById("credential_list");
+
+	//Clear the existing content
+	clearList();
 
 	if (iterate.length === 0) { //Handle empty arrays
-		var li = manager.getListItem();
-		manager.setInnerText(li, "No Pending Credentials");
-		manager.pushItem(li);
+		addNoElements(parent);
 		return;
 	}
 
-	iterate.map(function (value){ //Loop through the credentials
-		var li = manager.getListItem();
-		var buttonContainer = manager.getButtonContainer();
-		var addBtn = manager.getAddButton();
+	iterate.map(function (value, index){ //Loop through the credentials
 
-		var removeBtn = manager.getRemoveButton();
-
-		manager.addElement(addBtn, buttonContainer);
-		manager.addElement(removeBtn, buttonContainer);
-
-		var textContainer = manager.getTextContainer();
-		var hostField = manager.getHostNameLabel();
-		var userNameField = manager.getCredentialLabel();
-		var passwordField = manager.getCredentialLabel();
-
-		manager.setInnerText(userNameField, value.user);
-		//Replace password with (*) characters
-		var displayPassword = "";
-		for (var i=0; i < value.pass.length; i++) {
-			displayPassword += "*";
-		}
-		manager.setInnerText(passwordField, displayPassword);
-		manager.setInnerText(hostField, value.url.host);
-
-		manager.addElement(hostField, textContainer);
-		manager.addElement(userNameField, textContainer);
-		manager.addElement(passwordField, textContainer);
-
-		manager.addElement(textContainer, li);
-		manager.addElement(buttonContainer, li);
-
-		manager.pushItem(li);
-
-		manager.setOnClick(addBtn, function () { //Add the adding function to the add button
+		var addCredentials = function () { //Add the adding function to the add button
 			var bdMessage = {
 				"user": value.user,
 				"pass": value.pass,
@@ -164,13 +107,11 @@ function buildList(iterate) {
 					//Check for the result of the add
 					chrome.runtime.sendMessage(checkResult, function (result) {
 						console.log("Got push result: " + result);
-						if (result === "done")
-						{
+						if (result === "done") {
 							clearInterval(checkingLoop);
 							resolve();
 						}
-						else if (result === "fail")
-						{
+						else if (result === "fail") {
 							clearInterval(checkingLoop);
 							reject();
 						}	
@@ -186,16 +127,27 @@ function buildList(iterate) {
 				//TODO: display alert to the user
 			});
 
-		});
+		};
 
-		manager.setOnClick(removeBtn, function () { //Remove credential from the UI list
-			manager.removeItem(li); //Remove the item from the UI list
+		var currentItem; //The current listItem to be added
+
+		var removeCredentials = function () { //Remove credential from the UI list
+			parent.removeChild(currentItem); //Remove the item from the UI list
 			var removeMessage = {
 				"url": value.url,
 				"req": "remove"
 			};
 			chrome.runtime.sendMessage(removeMessage); //Remove credential from the backend list
-		});
+		};
+
+		//Construct listItem from data
+		currentItem = getItem(value.url.host, value.user, value.pass, addCredentials, removeCredentials);
+
+		parent.appendChild(currentItem); //Add item to the list
+
+		if (index + 1 != iterate.length) { //Not last iteration
+			drawHorizontalLine(parent);
+		}
 	});
 }
 
@@ -216,6 +168,10 @@ else //Debugging (for UI testing)
 			}
 		}];
 
-		buildList(x); //Build the UI from the fake data
+		x.push(x[0]);
+		x.push(x[0]);
+		x.push(x[0]);
+
+		buildList([]); //Build the UI from the fake data
 	});
 }

@@ -280,7 +280,7 @@ class QueueManager {
 function removeCredentials(url) {
 	for (var i=0; i < pendingCredentials.length; i++) {
 		var currentItem = pendingCredentials[i];
-		if (currentItem.url.href === url) {
+		if (currentItem.url.href === url.href) {
 			pendingCredentials.splice(i, 1);
 			setUIIcon();
 			break;
@@ -303,7 +303,9 @@ function rememberLogin(url) {
 	}
 }
 
+//Setup generate password context menu
 function setupContextMenu() {
+	//Add the context menu to chrome
 	chrome.contextMenus.create({
 		title: "Generate Random Password",
 		type: "normal",
@@ -311,16 +313,17 @@ function setupContextMenu() {
 		contexts: ["editable"]
 	});
 
+	//Listen for context menu clicks
 	chrome.contextMenus.onClicked.addListener(function (info, tab) {
 		writeLine("Context menu clicked");
 		writeLine(info);
-		if (info.menuItemId !== "fpa_generate_random_password") return;
+		if (info.menuItemId !== "fpa_generate_random_password") return; //Check if our context menu is clicked
 		var nh = new NetworkHandler();
-		nh.getRandomPassword().then(function (pass) {
-			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": true, "value": pass});
-		}, function (errorMessage) {
+		nh.getRandomPassword().then(function (pass) { //Get random password
+			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": true, "value": pass}); //Send random password to content script
+		}, function (errorMessage) { //Server offline
 			writeLine("Error occurred: " + errorMessage);
-			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": false})
+			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": false}) //Send error to content script
 		});
 		
 	});
