@@ -285,7 +285,7 @@ function rememberLogin(url) {
 	{
 		var urlArray = JSON.parse(stringUrlList);
 		urlArray.push(url);
-		localStorage.setItem("has_creds", JSON.stringify([urlArray]));
+		localStorage.setItem("has_creds", JSON.stringify(urlArray));
 	}
 }
 
