@@ -239,7 +239,7 @@ function sendMessage(message, callback){
 function setupPageCallback(){
 	//Subscribe for sendMessage events
 	window.addEventListener("fpa_message_passing", function (eventArgs){
-		if (typeof(msg.href) !== "undefined" && msg.href !== window.location.href) return; //Prevent malicious site from requesting credentials
+		if (typeof(eventArgs.detail.msg.href) !== "undefined" && eventArgs.detail.msg.href !== window.location.href) return; //Prevent malicious site from requesting credentials
 		chrome.runtime.sendMessage(eventArgs.detail.msg, eventArgs.detail.func); //Send mesage to background script
 	}, false);
 }
