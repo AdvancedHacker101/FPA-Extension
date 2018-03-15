@@ -114,9 +114,14 @@ function getLoginForms(fill){
 				}
 			}
 
-			if (!userFound) return;
+			if (!userFound) {
+				writeLine("Username field not found, possible password only login");
+				userField = {"value": "no-user"};
+				userFound = true;
+			} else {
+				writeLine("User found");
+			}
 
-			writeLine("User found");
 		}
 		else if (currentElement.tagName === "INPUT" && currentElement.type === "submit" && userFound && passFound){
 			writeLine("submit button found"); //Submit button found (probe actions here)
