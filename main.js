@@ -260,6 +260,12 @@ function bindContextMenu() {
 		writeLine("Got request");
 	    if(request.cmd == "fpa_set_randomPassword") {
 	    	writeLine("Got request to set password");
+	    	if (!request.success) {
+	    		var aw = new AlertWindow();
+	    		var alertBox = aw.error("Failed to generate random password, because server is offline");
+	    		aw.pushAlertWindow(alertBox);
+	    		return;
+	    	}
 	        clickedElement.value = request.value;
 	    }
 	});

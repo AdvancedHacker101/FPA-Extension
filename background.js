@@ -317,9 +317,10 @@ function setupContextMenu() {
 		if (info.menuItemId !== "fpa_generate_random_password") return;
 		var nh = new NetworkHandler();
 		nh.getRandomPassword().then(function (pass) {
-			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "value": pass});
+			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": true, "value": pass});
 		}, function (errorMessage) {
 			writeLine("Error occurred: " + errorMessage);
+			chrome.tabs.sendMessage(tab.id, {"cmd": "fpa_set_randomPassword", "success": false})
 		});
 		
 	});
