@@ -2,6 +2,8 @@
 <html>
 
 <head>
+	<!--Include Bootstrap-->
+	<link rel="stylesheet" type="text/css" href="FlatUI/css/vendor/bootstrap/css/bootstrap.min.css">
 	<!--Include FlatUI-->
 	<link rel="stylesheet" type="text/css" href="FlatUI/css/flat-ui.min.css">
 
@@ -12,17 +14,21 @@
 			float: right;
 			margin-right: 20px;
 			font-size: 24px;
+			cursor: pointer;
 		}
 		.addButton:hover {
 			color: #1ABC9C;
+			transition: color 300ms linear;
 		}
 		.removeButton {
 			float: right;
 			margin-right: 20px;
 			font-size: 24px;
+			cursor: pointer;
 		}
 		.removeButton:hover {
 			color: #E74C3C;
+			transition: color 300ms linear;
 		}
 		.listHeading {
 			margin-bottom: 2px;
@@ -39,6 +45,16 @@
 			width: 300px;
 			height: 500px;
 		}
+		.settingsIcon {
+			position: relative;
+			top: 0px;
+			left: 238px;
+			cursor: pointer;
+		}
+		.settingsIcon:hover {
+			color: #2ECC71;
+			transition: color 300ms linear;
+		}
 	</style>
 
 	<!--Include jQuery-->
@@ -49,7 +65,10 @@
 
 <body>
 
-<div class="container-fluid" style="height: 500px;">
+<!--Page Container-->
+<div class="container-fluid clearfix" style="height: 500px;">
+	<!--Extension Settings Button-->
+	<span class="fui-gear settingsIcon" title="Open Settings" id="settings_button"></span>
 	<!--Pending Credentials List-->
 	<div class="list-group listContainer" id="credential_list">
 		<!--<span class="list-group-item">

@@ -14,7 +14,7 @@
     	"default_popup": "ui.html" //The UI html file
   	},
   	"background": { //Background (back-end) script
-  		"scripts": ["background.js", "jquery.min.js"] //Javascript includes (jQuery and background.js)
+  		"scripts": ["jquery.min.js", "background.js"] //Javascript includes (jQuery and background.js)
   	},
   	"permissions": [ //Requested permissions
   		"storage", //for localStorage

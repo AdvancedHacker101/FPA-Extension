@@ -1,4 +1,5 @@
 var debug = false; //True if debug version (for UI testing)
+var languagePack; //The the language specific messages
 
 //Create a listItem from credentials
 //host: the host the credentials were captured on
@@ -24,6 +25,12 @@ function getItem(host, username, password, onadd, onremove) {
 	var hostHeading = document.createElement("h6");
 	hostHeading.classList.add("list-item-heading");
 	hostHeading.classList.add("listHeading");
+	if (host.length > 17) { //Check if the host string is longer than the page can display
+		hostHeading.title = host; //Set the full host as title
+		//Get the first 17 characters of the host and append 3 dots to it
+		host = host.substring(0, 17);
+		host += "...";
+	}
 	hostHeading.appendChild(getInner(host));
 	var userSmall = document.createElement("small");
 	userSmall.classList.add("list-item-text");
@@ -35,11 +42,11 @@ function getItem(host, username, password, onadd, onremove) {
 	addButton.classList.add("fui-plus-circle");
 	addButton.classList.add("addButton");
 	addButton.onclick = onadd;
-	addButton.title = "Save credentials on phone";
+	addButton.title = languagePack.add_button_title;
 	var removeButton = document.createElement("span");
 	removeButton.classList.add("fui-cross-circle");
 	removeButton.classList.add("removeButton");
-	removeButton.title = "Remove Credentials From list";
+	removeButton.title = languagePack.remove_button_title;
 	removeButton.onclick = onremove;
 	listItem.appendChild(hostHeading);
 	listItem.appendChild(userSmall);
@@ -51,19 +58,12 @@ function getItem(host, username, password, onadd, onremove) {
 	return listItem;
 }
 
-//Draw a horizontal line
-//parentElement: the element to draw the line on
-function drawHorizontalLine (parentElement) {
-	var hr = document.createElement("hr");
-	parentElement.appendChild(hr);
-}
-
 //Add no pending data heading
 //parentElement: the parent element to append the heading to
 function addNoElements (parentElement) {
 	var heading = document.createElement("h6");
 	heading.classList.add("noItems");
-	heading.appendChild(document.createTextNode("No Pending Credentials"));
+	heading.appendChild(document.createTextNode(languagePack.pending_list_empty));
 	parentElement.appendChild(heading);
 }
 
@@ -89,6 +89,8 @@ function buildList(iterate) {
 	}
 
 	iterate.map(function (value, index){ //Loop through the credentials
+
+		var currentItem; //The current listItem to be added
 
 		var addCredentials = function () { //Add the adding function to the add button
 			var bdMessage = {
@@ -120,7 +122,7 @@ function buildList(iterate) {
 			});
 
 			promise.then(function () { //Credentials added
-				manager.removeItem(li); //Remove from the pending UI list
+				parent.removeChild(currentItem); //Remove from the pending UI list
 				console.log("Credentials stored");
 			}, function () {
 				console.log("Failed to store credentials");
@@ -129,7 +131,7 @@ function buildList(iterate) {
 
 		};
 
-		var currentItem; //The current listItem to be added
+		
 
 		var removeCredentials = function () { //Remove credential from the UI list
 			parent.removeChild(currentItem); //Remove the item from the UI list
@@ -144,17 +146,36 @@ function buildList(iterate) {
 		currentItem = getItem(value.url.host, value.user, value.pass, addCredentials, removeCredentials);
 
 		parent.appendChild(currentItem); //Add item to the list
+	});
+}
 
-		if (index + 1 != iterate.length) { //Not last iteration
-			drawHorizontalLine(parent);
-		}
+//Load the language specific messages, used by this page
+//Returns promise
+function loadLanguagePack() {
+	var promise = new Promise(function (resolve, reject) {
+		chrome.runtime.sendMessage({"req": "get-language-pack", "context": "UI"}, function (langPack) { //Fetch pack from server
+			languagePack = langPack.lang_pack; //Set the global language container
+			resolve();
+		});
+	});
+
+	return promise;
+}
+
+//Assign click handler to the settings button
+function handleClick() {
+	document.getElementById("settings_button").addEventListener("click", function () {
+		window.location.href = "settings.html"; //Redirect to settings page
 	});
 }
 
 if (!debug) { //Not the debug version
-	chrome.runtime.sendMessage({req: "get_all"}, function (response){ //Get all pending credentials
-		buildList(response); //Generate the UI list
-	});
+	loadLanguagePack().then(function () {
+		handleClick(); //Setup the click handler
+		chrome.runtime.sendMessage({req: "get_all"}, function (response){ //Get all pending credentials
+			buildList(response); //Generate the UI list
+		});
+	}); //Load the language pack
 }
 else //Debugging (for UI testing)
 {
@@ -168,10 +189,17 @@ else //Debugging (for UI testing)
 			}
 		}];
 
+		languagePack = {
+			"add_button_title": "Store creds on phone",
+			"remove_button_title": "Remove creds from list",
+			"pending_list_empty": "No pending credentials"
+		};
+
 		x.push(x[0]);
 		x.push(x[0]);
 		x.push(x[0]);
 
-		buildList([]); //Build the UI from the fake data
+		handleClick();
+		buildList(x); //Build the UI from the fake data
 	});
 }

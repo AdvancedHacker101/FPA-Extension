@@ -2,6 +2,7 @@ var pendingCredentials = []; //List for pending in memory credentials (registrat
 var debug = true; //Defines if writeLine outputs messages
 var pushPasswordQueue; //Password store queue
 var getPasswordQueue; //Password get queue
+var lh; //Support multiple languages
 
 //Write debug messages to the console
 function writeLine(message){
@@ -276,6 +277,49 @@ class QueueManager {
 	}
 }
 
+//Class for supporting multiple languages
+class LanguageHandler {
+
+	constructor () { //Init the language handler
+		this.defaultLanguage = "en"; //Set the default language to english
+		var languageSettings = localStorage.getItem("language"); //Get the language settings stored in localStorage
+		this.language = (languageSettings !== null) ? languageSettings : this.defaultLanguage; //Set the language to default or the selected
+		this.loadContent = function () { //Define language loading function
+			var inst = this; //Save instance
+			var promise = new Promise(function (resolve, reject) {
+				$.getJSON(`lang/${inst.language}.json`, function (result) { //Get the current language's file
+					inst.content = result; //Store the file's contents in memory
+					resolve();
+				});
+			});
+
+			return promise;
+		};
+	}
+
+	//Load the language initially
+	init() {
+		return this.loadContent();
+	}
+
+	//Change the current language
+	setLanguage(language) {
+		localStorage.setItem("language", language); //Write changes to localStorage
+		this.language = language; //Set the current language in memory
+		this.loadContent(); //Reload the language list
+	}
+
+	//Get the current language
+	getLanguage() {
+		return this.language;
+	}
+
+	//Get the messages of a specific context from the current language
+	getContent(context) {
+		return this.content[context]; //Return the specified context's messages
+	}
+}
+
 //Remove a credential from the pending list
 function removeCredentials(url) {
 	for (var i=0; i < pendingCredentials.length; i++) {
@@ -306,8 +350,10 @@ function rememberLogin(url) {
 //Setup generate password context menu
 function setupContextMenu() {
 	//Add the context menu to chrome
+	var content = lh.getContent("background_script");
+	var contextMenuTitle = lh.getContent("background_script").context_menu_generate_random_password;
 	chrome.contextMenus.create({
-		title: "Generate Random Password",
+		title: contextMenuTitle,
 		type: "normal",
 		id: "fpa_generate_random_password",
 		contexts: ["editable"]
@@ -331,124 +377,150 @@ function setupContextMenu() {
 
 //Entry point
 writeLine("Background Script Running");
-pushPasswordQueue = new QueueManager();
-getPasswordQueue = new QueueManager();
-setupContextMenu();
+var init = function () {
+	pushPasswordQueue = new QueueManager();
+	getPasswordQueue = new QueueManager();
+	setupContextMenu();
 
-//Message from exensions
-chrome.runtime.onMessage.addListener(function (input, sender, sendResponse) {
+	//Message from exensions
+	chrome.runtime.onMessage.addListener(function (input, sender, sendResponse) {
 
-	writeLine("Got request");
-	writeLine(input);
+		writeLine("Got request");
+		writeLine(input);
 
-	if (input.req === "stor") { //Add credentials to the pedning list
-		var credentials = {
-			"user": input.user,
-			"pass": input.pass,
-			"url": input.url
-		};
+		if (input.req === "stor") { //Add credentials to the pedning list
+			var credentials = {
+				"user": input.user,
+				"pass": input.pass,
+				"url": input.url
+			};
 
-		pendingCredentials.push(credentials);
-		setUIIcon();
-	}
-	else if (input.req === "get_all") { //Get pending credentials
-		sendResponse(pendingCredentials);
-	}
-	else if (input.req === "remove") { //Remove pedning credential from pending list
-		removeCredentials(input.url);
-	}
-	else if (input.req === "push") { //Add credential to the phone's DB
-		var nh = new NetworkHandler();
-		pushPasswordQueue.add(input.url, "pending");
-		nh.getRequestToken().then(function () {
-			writeLine("Got requets token");
-			nh.pushCredentials(input).then(function () {
-				writeLine("Push completed");
-				nh.beginPushResultChecking().then(function () {
-					writeLine("Credentials Stored");
-					removeCredentials(input.url);
-					pushPasswordQueue.update(input.url, "done");
-					rememberLogin(input.url);
-				}, function(reason3) {
-					writeLine("Credential Store failed on server remotely promise:");
-					writeLine(reason3);
+			pendingCredentials.push(credentials);
+			setUIIcon();
+		}
+		else if (input.req === "get_all") { //Get pending credentials
+			sendResponse(pendingCredentials);
+		}
+		else if (input.req === "remove") { //Remove pedning credential from pending list
+			removeCredenitals(input.url);
+		}
+		else if (input.req === "push") { //Add credential to the phone's DB
+			var nh = new NetworkHandler();
+			pushPasswordQueue.add(input.url, "pending");
+			nh.getRequestToken().then(function () {
+				writeLine("Got requets token");
+				nh.pushCredentials(input).then(function () {
+					writeLine("Push completed");
+					nh.beginPushResultChecking().then(function () {
+						writeLine("Credentials Stored");
+						removeCredentials(input.url);
+						pushPasswordQueue.update(input.url, "done");
+						rememberLogin(input.url);
+					}, function(reason3) {
+						writeLine("Credential Store failed on server remotely promise:");
+						writeLine(reason3);
+						pushPasswordQueue.update(input.url, "fail");
+					});
+				}, function(reason2) {
+					writeLine("Credential push failed promise:");
+					writeLine(reason2);
 					pushPasswordQueue.update(input.url, "fail");
 				});
-			}, function(reason2) {
-				writeLine("Credential push failed promise:");
-				writeLine(reason2);
+			}, function (reason1) {
+				writeLine("Token request failed promise:");
+				writeLine(reason1);
 				pushPasswordQueue.update(input.url, "fail");
 			});
-		}, function (reason1) {
-			writeLine("Token request failed promise:");
-			writeLine(reason1);
-			pushPasswordQueue.update(input.url, "fail");
-		});
-	}
-	else if (input.req === "push-result") { //Get the state of the password store
-		var state = pushPasswordQueue.getState(input.url);
-		writeLine("Queue State: ");
-		writeLine(state);
-		if (state === "done" || state === "fail") //If done or failed
-		{
-			pushPasswordQueue.remove(input.url); //Remove password from the queue
 		}
-		sendResponse(state);
-	}
-	else if (input.req === "has-credential") { //Check if an url has stored credentials
-		var stringUrlArray = localStorage.getItem("has_creds");
-		if (stringUrlArray === null) {
-			sendResponse({"result": false}); //No entry in the local store -> return false
+		else if (input.req === "push-result") { //Get the state of the password store
+			var state = pushPasswordQueue.getState(input.url);
+			writeLine("Queue State: ");
+			writeLine(state);
+			if (state === "done" || state === "fail") //If done or failed
+			{
+				pushPasswordQueue.remove(input.url); //Remove password from the queue
+			}
+			sendResponse(state);
 		}
-		else {
-			var urlArray = JSON.parse(stringUrlArray); //Parse the array from the local storage
-			if (urlArray.includes(input.url)) sendResponse({"result": true}); //Array has the URL -> return true
-			else sendResponse({"result": false}); //Array doesn't have the URL -> return false
+		else if (input.req === "has-credential") { //Check if an url has stored credentials
+			var stringUrlArray = localStorage.getItem("has_creds");
+			if (stringUrlArray === null) {
+				sendResponse({"result": false}); //No entry in the local store -> return false
+			}
+			else {
+				var urlArray = JSON.parse(stringUrlArray); //Parse the array from the local storage
+				if (urlArray.includes(input.url)) sendResponse({"result": true}); //Array has the URL -> return true
+				else sendResponse({"result": false}); //Array doesn't have the URL -> return false
+			}
 		}
-	}
-	else if (input.req === "get-credentials") { //Get credentials for an URL
-		getPasswordQueue.add(input.url, "pending");
-		var nh = new NetworkHandler(80);
-		nh.getRequestToken().then(function () {
-			nh.pushGetRequest(input.url).then(function () {
-				nh.beginGetResultChecking().then(function (credentials) {
-					writeLine("Got credentials");
-					writeLine(credentials);
-					getPasswordQueue.update(input.url, "done", credentials);
+		else if (input.req === "get-credentials") { //Get credentials for an URL
+			getPasswordQueue.add(input.url, "pending");
+			var nh = new NetworkHandler(80);
+			nh.getRequestToken().then(function () {
+				nh.pushGetRequest(input.url).then(function () {
+					nh.beginGetResultChecking().then(function (credentials) {
+						writeLine("Got credentials");
+						writeLine(credentials);
+						getPasswordQueue.update(input.url, "done", credentials);
+					}, function () {
+						writeLine("Failed while get state phase");
+						getPasswordQueue.update(input.url, "fail");
+					});
 				}, function () {
-					writeLine("Failed while get state phase");
+					writeLine("Failed to send get request");
 					getPasswordQueue.update(input.url, "fail");
 				});
 			}, function () {
-				writeLine("Failed to send get request");
+				writeLine("Failed to get token");
 				getPasswordQueue.update(input.url, "fail");
 			});
-		}, function () {
-			writeLine("Failed to get token");
-			getPasswordQueue.update(input.url, "fail");
-		});
-	}
-	else if (input.req === "get-state") { //Check the state of getting the crendetials
-		var state = getPasswordQueue.getState(input.url);
-		var extra = getPasswordQueue.getExtra(input.url);
-		if (state === "done" || state === "fail") {
-			getPasswordQueue.remove(input.url);
 		}
+		else if (input.req === "get-state") { //Check the state of getting the crendetials
+			var state = getPasswordQueue.getState(input.url);
+			var extra = getPasswordQueue.getExtra(input.url);
+			if (state === "done" || state === "fail") {
+				getPasswordQueue.remove(input.url);
+			}
 
-		var response;
-		if (extra !== undefined) {
-			response = {
-				"status": state,
-				"user": extra.user,
-				"pass": extra.pass
-			};
+			var response;
+			if (extra !== undefined) {
+				response = {
+					"status": state,
+					"user": extra.user,
+					"pass": extra.pass
+				};
+			}
+			else {
+				response = {
+					"status": state
+				};
+			}
+			sendResponse(response);
 		}
-		else {
-			response = {
-				"status": state
-			};
+		else if (input.req === "get-language-pack") { //Get language specific messages
+			if (input.context.includes(";")) { //Check if the request has multiple contexts
+				var contextLoadList = input.context.split(";");
+				var contextList = [];
+				for (var context in contextLoadList) {
+					contextList.push(lh.getContent(context));
+				}
+				sendResponse({"lang_pack": contextList}); //Retrun multiple contexts
+			}
+			else sendResponse({"lang_pack": lh.getContent(input.context)}); //Return the requested context
 		}
-		sendResponse(response);
-	}
-	
+		else if (input.req === "get-current-language") { //Get the current language selected by the user
+			sendResponse({"current_language": lh.getLanguage()})
+		}
+		else if (input.req === "set-current-language") { //Set the language of the extension
+			if (typeof(input.language !== "undefined")) { //Check if the language is set in the request
+				lh.setLanguage(input.language);
+			}
+		}
+		
+	});
+};
+lh = new LanguageHandler(); //Create the language handler
+lh.init().then(function () { //Init the language handler
+	writeLine("Language Loaded");
+	init(); //Start the background application
 });

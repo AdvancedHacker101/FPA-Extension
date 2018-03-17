@@ -1,4 +1,5 @@
 var debug = true; //True to show debugging output
+var languagePack; //The language specific messages
 
 //Alert Window in the top right corner
 class AlertWindow {
@@ -142,7 +143,7 @@ function getLoginForms(fill){
 				var aw = new AlertWindow(); //New alert window
 				//Construct the extra element
 				var btn = document.createElement("span");
-				btn.appendChild(document.createTextNode("Click Here to fill credentials"));
+				btn.appendChild(document.createTextNode(languagePack.fill_credentials_prompt));
 				btn.classList.add("fillText");
 				var alertBox;
 				btn.onclick = function () {
@@ -153,12 +154,12 @@ function getLoginForms(fill){
 						userField.value = credentials.user;
 						passField.value = credentials.pass;
 					}, function () { //Load failed
-						var errContainer = aw.error("Failed to get credentials");
+						var errContainer = aw.error(languagePack.credential_fill_failed);
 						aw.pushAlertWindow(errContainer);
 					});
 				};
 
-				alertBox = aw.info("Credentials Saved for this site!", btn); //Generate the alert window
+				alertBox = aw.info(languagePack.fill_credentials_info, btn); //Generate the alert window
 				aw.pushAlertWindow(alertBox); //Show the alert window on the site
 			}
 
@@ -247,45 +248,62 @@ function setupPageCallback(){
 	}, false);
 }
 
-var clickedElement;
+var clickedElement; //The element, generated random password was invoked on
 
+//Bind content script to listen for random password generation results
 function bindContextMenu() {
 	window.addEventListener("mousedown", function (e) {
 		if (e.button == 2) { //Check for Right Click
-			clickedElement = e.target;
+			clickedElement = e.target; //Set the target element of the generation
 		}
 	}, true);
 
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		writeLine("Got request");
-	    if(request.cmd == "fpa_set_randomPassword") {
+	    if(request.cmd == "fpa_set_randomPassword") { //Set the random password
 	    	writeLine("Got request to set password");
-	    	if (!request.success) {
+	    	if (!request.success) { //Failed to generate password, show error to the user
 	    		var aw = new AlertWindow();
-	    		var alertBox = aw.error("Failed to generate random password, because server is offline");
+	    		var alertBox = aw.error(languagePack.password_generation_failed);
 	    		aw.pushAlertWindow(alertBox);
 	    		return;
 	    	}
-	        clickedElement.value = request.value;
+	        clickedElement.value = request.value; //Set the random password
 	    }
 	});
 }
 
+//Alert the user when using plain text HTTP
 function alertHTTP() {
 	var aw = new AlertWindow();
-	var alertBox = aw.warning("Login Form Detected and this site uses insecure HTTP!")
-	aw.pushAlertWindow(alertBox);
+	var alertBox = aw.warning(languagePack.warning_insecure_http);
+	aw.pushAlertWindow(alertBox); //Alert the user
+}
+
+//Load the language specific messages of the page
+function loadLanguagePack() {
+	var promise = new Promise(function (resolve, reject) {
+		chrome.runtime.sendMessage({"req": "get-language-pack", "context": "content_script"}, function (langPack) { //Request data from background app
+			languagePack = langPack.lang_pack; //Set the global language pack
+			resolve();
+		});
+	});
+
+	return promise;
 }
 
 //Entry point
 writeLine("FPA Is Running");
-setupPageCallback(); //Setup the sendMessage function
-bindContextMenu(); //Handle the click event of generate random password
-var checkCreds = {
-	"req": "has-credential",
-	"url": window.location.href
-};
-//Check if the site has stored credentials
-sendMessage(checkCreds, function (response) {
-	getLoginForms(response.result); //Detect and Probe login forms
+loadLanguagePack().then(function () { //Load the messages of the specified language
+	writeLine("Language pack loaded");
+	setupPageCallback(); //Setup the sendMessage function
+	bindContextMenu(); //Handle the click event of generate random password
+	var checkCreds = {
+		"req": "has-credential",
+		"url": window.location.href
+	};
+	//Check if the site has stored credentials
+	sendMessage(checkCreds, function (response) {
+		getLoginForms(response.result); //Detect and Probe login forms
+	});
 });
