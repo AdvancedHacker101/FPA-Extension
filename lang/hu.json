@@ -1,0 +1,22 @@
+{
+	"UI": {
+	 	"add_button_title": "Adatok mentése telefonra",
+		"remove_button_title": "Adatok eltávolítása a listából",
+		"pending_list_empty": "Nincs mentetlen adat",
+		"open_settings_button_title": "Beállítások Megnyitása"
+	},
+	"content_script": {
+		"fill_credentials_prompt": "Kattints ide az adatok betöltéséhez",
+		"credential_fill_failed": "Nem sikerült betölteni az adatokat",
+		"fill_credentials_info": "Van mentett bejelentkezés ehhez az oldalhoz",
+		"password_generation_failed": "Nem sikerült random jelszavat generálni, mert a szerver nem elérhető",
+		"warning_insecure_http": "Bejelentkezési panel észlelve, de az oldal biztonságtalan HTTP-t használ"
+	},
+	"background_script": {
+		"context_menu_generate_random_password": "Random jelszó készítés"
+	},
+	"settings": {
+		"language": "Nyelv",
+		"language_description": "Válaszd ki a neked megfelelő nyelvet"
+	}
+}
