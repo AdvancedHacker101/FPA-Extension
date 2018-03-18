@@ -11,12 +11,12 @@ function writeLine(message){
 
 //Set the Icon of the popup panel
 function setUIIcon() {
-	var icon = "";
+	//var icon = "";
 	var numberOfPending = pendingCredentials.length;
-	if (numberOfPending > 0) icon = "icon2.png";
-	else icon = "icon1.png";
+	/*if (numberOfPending > 0) icon = "icon2.png";
+	else icon = "icon1.png";*/
 
-	chrome.browserAction.setIcon({path: icon}); //Set the icon
+	//chrome.browserAction.setIcon({path: icon}); //Set the icon
 	chrome.browserAction.setBadgeText({text: numberOfPending.toString()}); //Set the number of pending credentials
 }
 

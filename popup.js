@@ -171,7 +171,7 @@ function handleClick() {
 
 if (!debug) { //Not the debug version
 	loadLanguagePack().then(function () {
-		document.getElementById("settings_button").title = languagePack.open_settings_button_title;
+		document.getElementById("settings_button").title = languagePack.open_settings_button_title; //Set the settings button's title
 		handleClick(); //Setup the click handler
 		chrome.runtime.sendMessage({req: "get_all"}, function (response){ //Get all pending credentials
 			buildList(response); //Generate the UI list

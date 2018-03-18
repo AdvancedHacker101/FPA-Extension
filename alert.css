@@ -13,24 +13,32 @@
     width: 300px;
 }
 
+/*Alert window text style*/
+.alert-text {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    color: #ECF0F1; /*(Light Gray color)*/
+}
+
 /*Error alert box sub-style*/
 .alert.error {
-    background-color: #f44336; /*(Red color)*/
+    background-color: #E74C3C; /*(Red color)*/
 }
 
 /*Success alert box sub-style*/
 .alert.success {
-    background-color: #4CAF50; /*(Green color)*/
+    background-color: #2ECC71; /*(Green color)*/
 }
 
 /*Info alert box sub-style*/
 .alert.info {
-    background-color: #2196F3; /*(Blue Color)*/
+    background-color: #3498DB; /*(Blue Color)*/
 }
 
 /*Warning alert box sub-style*/
 .alert.warning {
-    background-color: #ff9800; /*(Yellow Color)*/
+    background-color: #F39C12; /*(Yellow Color)*/
 }
 
 /*Alert box close button main style*/
@@ -52,7 +60,6 @@
 
 /*Password fill hyperlink main style*/
 .fillText {
-    color: white;
     text-decoration: underline;
     cursor: pointer;
 }

@@ -44,13 +44,16 @@ class AlertWindow {
 			inst.closeWindow(container);
 		};
 		var textNode = document.createTextNode(message);
+		var alertText = document.createElement("p");
+		alertText.appendChild(textNode);
+		alertText.classList.add("alert-text");
 		var closeButtonText = document.createTextNode("×");
 		closeButton.appendChild(closeButtonText);
 		container.appendChild(closeButton);
-		container.appendChild(textNode);
+		container.appendChild(alertText);
 		if (ctAppend !== undefined)
 		{
-			container.appendChild(document.createElement("br"));
+			//container.appendChild(document.createElement("br"));
 			container.appendChild(ctAppend);
 		}
 		//document.body.appendChild(container);
@@ -145,6 +148,7 @@ function getLoginForms(fill){
 				var btn = document.createElement("span");
 				btn.appendChild(document.createTextNode(languagePack.fill_credentials_prompt));
 				btn.classList.add("fillText");
+				btn.classList.add("alert-text");
 				var alertBox;
 				btn.onclick = function () {
 

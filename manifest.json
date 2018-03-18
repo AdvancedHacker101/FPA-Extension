@@ -10,8 +10,9 @@
 		"css": ["alert.css"] //Include the alert box css
 	}],
 	"browser_action": { //The UI of the application
-    	"default_icon": "icon1.png", //The default startup icon
-    	"default_popup": "ui.html" //The UI html file
+    	"default_icon": "Icons/IconMain-16.png", //The default startup icon
+    	"default_popup": "ui.html", //The UI html file
+    	"default_title": "Fingerprint Authentication" //The title text for the extension's icon
   	},
   	"background": { //Background (back-end) script
   		"scripts": ["jquery.min.js", "background.js"] //Javascript includes (jQuery and background.js)
