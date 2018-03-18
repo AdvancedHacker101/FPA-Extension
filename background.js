@@ -306,7 +306,7 @@ class LanguageHandler {
 	setLanguage(language) {
 		localStorage.setItem("language", language); //Write changes to localStorage
 		this.language = language; //Set the current language in memory
-		this.loadContent(); //Reload the language list
+		return this.loadContent(); //Reload the language list
 	}
 
 	//Get the current language
@@ -513,7 +513,13 @@ var init = function () {
 		}
 		else if (input.req === "set-current-language") { //Set the language of the extension
 			if (typeof(input.language !== "undefined")) { //Check if the language is set in the request
-				lh.setLanguage(input.language);
+				lh.setLanguage(input.language).then(function () {
+					chrome.contextMenus.update("fpa_generate_random_password", {
+						title: lh.getContent("background_script").context_menu_generate_random_password
+					});
+
+					chrome.runtime.sendMessage({"cmd": "fpa_set_languagePack", "lang_pack": lh.getContent("content_script")});
+				});
 			}
 		}
 		

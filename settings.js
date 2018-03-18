@@ -44,23 +44,19 @@ function loadLangMap() {
 //selectorTextNode: the textNode (the current language) assigned to the dropdown
 //languageShortName: the short (code) name of the language
 //caret: the textNode assigned to the dropdown
-function getListItem(language, selectorTextNode, languageShortName, caret) {
+function getListItem(language, selectorTextNode, languageShortName) {
 	var listItem = document.createElement("li"); //Create the list item
 	var hyperlink = document.createElement("a"); //Create the language displaying "a" tag
 	hyperlink.href = "#"; //Point the "a" tag to void
 	hyperlink.onclick = function () { //Set the onclick function TODO: test if language updates work at all!
-		//Update dropdown
-		var langSelector = document.getElementById("select_language"); //Get the dropdown
-		langSelector.removeChild(selectorTextNode); //Remove the currentLanguage
-		langSelector.removeChild(caret); //Remove the caret
-		langSelector.appendChild(document.createTextNode(language)); //Assign the new language
-		var caret = document.createElement("span"); //Create a span element (for the caret)
-		caret.classList.add("caret"); //Apply the caret class to the span
-		langSelector.appendChild(caret); //Append caret after changing current language
 		//Update current language cache
 		langCache = languageShortName;
 		//Reload page content with new language, without reloading the language list
-		formatPage(true);
+		setTimeout(function () {
+			loadLanguagePack().then(function () {
+				formatPage(true);
+			});
+		}, 1000);
 		//Change background language settings
 		chrome.runtime.sendMessage({"req": "set-current-language", "language": languageShortName});
 	};
@@ -81,15 +77,17 @@ function formatPage(skipList) {
 	for (var property in languagePack) {
 		if (languagePack.hasOwnProperty(property)) {
 			var element = document.getElementById(property); //Load the element, the message belongs to
+			element.innerText = "";
 			element.appendChild(document.createTextNode(languagePack[property])); //Display the message on the element
 		}
 	}
 
 	//Load dynamic content
 	var langSelector = document.getElementById("select_language"); //Get the dropdown
-	var caret = document.createElement("span"); //Create the span (for the caret)
-	caret.classList.add("caret"); //Apply the caret class to the span
 	getCurrentLanguage().then(function (currentLanguage) { //Retrieve the current language
+		langSelector.innerText = "";
+		var caret = document.createElement("span"); //Create the span (for the caret)
+		caret.classList.add("caret"); //Apply the caret class to the span
 		var selectorTextNode = document.createTextNode(languageMap[currentLanguage]); //Create a textNode for the current language
 		langSelector.appendChild(selectorTextNode); //Load current language name to dropdown
 		langSelector.appendChild(caret); //Load the caret character after the current language
@@ -98,7 +96,7 @@ function formatPage(skipList) {
 			var parentList = document.getElementById("languageList"); //Get the listElement
 			for (var property in languageMap) {
 				if (languageMap.hasOwnProperty(property)) {
-					parentList.appendChild(getListItem(languageMap[property], selectorTextNode, property, caret)); //Load supported languages list
+					parentList.appendChild(getListItem(languageMap[property], selectorTextNode, property)); //Load supported languages list
 				}
 			}
 		}

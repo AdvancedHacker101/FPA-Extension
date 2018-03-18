@@ -270,6 +270,10 @@ function bindContextMenu() {
 	    	}
 	        clickedElement.value = request.value; //Set the random password
 	    }
+	    else if (request.cmd == "fpa_set_languagPack") {
+	    	writeLine("Got set language pack");
+	    	languagePack = request.lang_pack;
+	    }
 	});
 }
 
