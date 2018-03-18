@@ -1,0 +1,21 @@
+{ //English language resource file
+	"UI": { //Messages for the UI (popup) window
+	 	"add_button_title": "Save credentials on phone", //When hovering over the add button
+		"remove_button_title": "Remove credentials from list", //When hovering over the remove button
+		"pending_list_empty": "No pending credentials" //When no pending credentials exist
+	},
+	"content_script": { //Messages for the content_script (website)
+		"fill_credentials_prompt": "Click here to fill credentials", //When credentials are stored for the current site, fill action
+		"credential_fill_failed": "Failed to get credentials", //When failed to load credentials for the current site
+		"fill_credentials_info": "Credentials saved for this site!", //When credentials are stored fro the current site, notify prompt
+		"password_generation_failed": "Failed to generate random password, because the server is offline", //When failed to generate random password, because the server is offline
+		"warning_insecure_http": "Login form detected and this site uses insecure HTTP!" //When login form is detected and connection is over plain HTTP
+	},
+	"background_script": { //Message for the background application (extension "server")
+		"context_menu_generate_random_password": "Generate random password" //Context menu text for generating a random password
+	},
+	"settings": { //Messages for the settings (popup) page
+		"language": "Language", //The word "language"
+		"language_description": "Select your language of preference" //The description of setting the current language
+	}
+}

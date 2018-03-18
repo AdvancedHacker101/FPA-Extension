@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<!--Load Bootstrap-->
+		<link rel="stylesheet" type="text/css" href="FlatUI/css/vendor/bootstrap/css/bootstrap.min.css">
+		<!--Include FlatUI-->
+		<link rel="stylesheet" type="text/css" href="FlatUI/css/flat-ui.min.css">
+
+		<!--Custom CSS Code-->
+		<style type="text/css">
+			body {
+				width: 300px;
+				height: 500px;
+			}
+			.settingsContainer {
+				overflow-x: none;
+				overflow-y: auto;
+			}
+			.backButtonBackground {
+				width: 50px;
+				height: 28px;
+				background-color: transparent;
+				position:relative;
+				top: 0;
+				left: -15px; /*To cancel out container padding*/
+				cursor: pointer;
+			}
+			.backButtonBackground:hover {
+				background-color: #2C3E50;
+				transition: background-color 300ms linear;
+			} 
+			.backButton {
+				position: relative;
+				top: -1px;
+				left: 14px;
+				color: #ECF0F1;
+			}
+		</style>
+
+		<!--Include jQuery-->
+		<script type="text/javascript" src="jquery.min.js"></script>
+		<!--Include the FlatUI.js-->
+		<script type="text/javascript" src="FlatUI/js/flat-ui.min.js"></script>
+		<!--Include UI loader-->
+		<script type="text/javascript" src="settings.js"></script>
+	</head>
+
+	<body>
+
+		<!--Page container-->
+		<div class="container-fluid settingsContainer" style="height: 500px;">
+			<!--Back button background-->
+			<div class="backButtonBackground" id="back_button">
+				<!--Back button icon-->
+				<span class="fui-arrow-left backButton"></span>
+			</div>
+			
+			<!--Language menu point-->
+			<h6 id="language" style="margin-bottom: 1px"></h6>
+			<!--Pad menu data from menu heading-->
+			<div style="margin-left: 5px">
+				<!--Description of this menu-->
+				<small id="language_description"></small>
+				<!--Language list dropdown-->
+				<div class="dropdown">
+					<!--Button to open the dropdown-->
+			        <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle" type="button" id="select_language"><!--<span class="caret"></span>--></button>
+			        <!--The list to dropdown display-->
+			        <ul role="menu" class="dropdown-menu" id="languageList">
+				    	<!--<li><a href="#">English</a></li>
+				      	<li><a href="#">German</a></li>-->
+			        </ul>
+			  	</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>
